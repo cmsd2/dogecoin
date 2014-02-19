@@ -1608,3 +1608,26 @@ Value listlockunspent(const Array& params, bool fHelp)
     return ret;
 }
 
+Value relaytransaction(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "relaytransaction <txid>\n"
+            "Relay a single in-wallet transaction <txid>");
+
+    uint256 hash;
+    hash.SetHex(params[0].get_str());
+
+    if (!pwalletMain->mapWallet.count(hash))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
+    CWalletTx& wtx = pwalletMain->mapWallet[hash];
+
+    wtx.RelayWalletTransaction();
+
+    Object entry;
+    entry.push_back(Pair("relayed", true)); 
+
+    return entry;
+}
+
+
